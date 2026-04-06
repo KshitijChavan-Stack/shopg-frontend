@@ -5,41 +5,9 @@ import { Spinner } from "../components/Toast";
 import { Icons } from "../components/Icons";
 import { CATEGORY_META } from "../constants";
 import { API } from "../config";
+import { ProductCard } from "../components/ProductCard";
 
-function ProductCard({ product, onAdd, inCart }) {
-  const meta = CATEGORY_META[product.category] || {};
-  const [imgErr, setImgErr] = useState(false);
-
-  return (
-    <div className="product-card">
-      <div className="product-img-wrap">
-        {product.image && !imgErr ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            onError={() => setImgErr(true)}
-          />
-        ) : (
-          <span className="product-img-placeholder">{meta.abbr || "IMG"}</span>
-        )}
-      </div>
-      <div className="product-info">
-        <div className="product-cat">{meta.label || product.category}</div>
-        <div className="product-name">{product.name}</div>
-        <div className="product-price">₹{product.price}</div>
-        <button
-          className={`add-btn ${inCart ? "in-cart" : ""}`}
-          onClick={() => !inCart && onAdd(product)}
-          disabled={inCart}
-        >
-          {inCart ? "In Cart" : "Add to Cart"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export default function ProductsPage({ category, searchQuery, setPage }) {
+export default function ProductsPage({ category, searchQuery, setPage, onProductClick }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -109,6 +77,7 @@ export default function ProductsPage({ category, searchQuery, setPage }) {
                 product={p}
                 onAdd={handleAdd}
                 inCart={cartNames.includes(p.name)}
+                onClick={onProductClick}
               />
             ))}
           </div>

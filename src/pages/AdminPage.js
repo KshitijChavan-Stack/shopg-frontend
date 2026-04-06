@@ -1,19 +1,51 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Toast, useToast, Spinner } from "../components/Toast";
 import { Icons } from "../components/Icons";
 import { CATEGORY_META } from "../constants";
 import { API } from "../config";
+import Papa from "papaparse";
 
 const STATUS_OPTIONS = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
-function ProductModal({ product, onClose, onSave }) {
+function ProductModal({ product, onClose, onSave, show }) {
   const [form, setForm] = useState(
-    product || { name: "", price: "", category: "grocery", image: "", description: "" }
+    product || { name: "", price: "", category: "grocery", brand: "", image: "", description: "" }
   );
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch(`${API}/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("shopg_token")}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        set("image", data.url);
+        show("Image uploaded successfully!", "success");
+      } else {
+        show(data.message || "Upload failed", "error");
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      show("Network error during upload", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!form.name || !form.price || !form.category) return;
@@ -44,8 +76,18 @@ function ProductModal({ product, onClose, onSave }) {
           </select>
         </div>
         <div className="form-group">
-          <label className="form-label">Cloudinary Image URL</label>
-          <input className="form-input" value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="https://res.cloudinary.com/…" />
+          <label className="form-label">Brand</label>
+          <input className="form-input" value={form.brand} onChange={(e) => set("brand", e.target.value)} placeholder="e.g. Nestlé" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Product Image</label>
+          <div style={{ display: "flex", gap: 10 }}>
+            <input className="form-input" value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="URL or upload..." style={{ flex: 1 }} />
+            <button className="btn-outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+              {uploading ? "..." : Icons.plus}
+            </button>
+            <input type="file" ref={fileInputRef} hidden onChange={handleImageUpload} accept="image/*" />
+          </div>
         </div>
         <div className="form-group">
           <label className="form-label">Description</label>
@@ -166,6 +208,58 @@ export default function AdminPage({ setPage }) {
     else show(data.message || "Error", "error");
   };
 
+  const handleBulkUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const products = results.data.map(p => ({
+          ...p,
+          price: Number(p.price),
+          image: p.image || p.image_url || ""
+        }));
+
+        try {
+          const res = await fetch(`${API}/products/bulk`, {
+            method: "POST",
+            headers: authH,
+            body: JSON.stringify(products)
+          });
+          const data = await res.json();
+          if (data.success) {
+            show(`Imported ${data.products.length} products!`, "success");
+            fetchProducts();
+          } else {
+            show(data.message, "error");
+          }
+        } catch (err) {
+          show("Bulk upload failed", "error");
+        }
+      }
+    });
+  };
+
+  const downloadTemplate = () => {
+    const csv = Papa.unparse([{
+      name: "Product Name",
+      price: 100,
+      category: "grocery",
+      brand: "Brand Name",
+      description: "Description here",
+      image: "https://example.com/img.jpg"
+    }]);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", "shopg_bulk_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!user || user.role !== "admin") {
     return (
       <div className="admin-wrap">
@@ -187,6 +281,7 @@ export default function AdminPage({ setPage }) {
           product={productModal === "new" ? null : productModal}
           onClose={() => setProductModal(null)}
           onSave={saveProduct}
+          show={show}
         />
       )}
       {orderModal && (
@@ -218,8 +313,18 @@ export default function AdminPage({ setPage }) {
       {/* Products Tab */}
       {tab === "products" && (
         <>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-            <button className="btn-primary" style={{ gap: 8 }} onClick={() => setProductModal("new")}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: 12 }}>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button className="btn-outline" style={{ fontSize: "0.8rem", height: 38 }} onClick={downloadTemplate}>
+                {Icons.download} Template
+              </button>
+              <label className="btn-outline" style={{ fontSize: "0.8rem", height: 38, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                {Icons.plus} Bulk Upload
+                <input type="file" hidden accept=".csv" onChange={handleBulkUpload} />
+              </label>
+            </div>
+            
+            <button className="btn-primary" style={{ gap: 8, height: 38 }} onClick={() => setProductModal("new")}>
               {Icons.plus} Add Product
             </button>
           </div>
@@ -231,6 +336,7 @@ export default function AdminPage({ setPage }) {
                   <tr>
                     <th>Image</th>
                     <th>Name</th>
+                    <th>Brand</th>
                     <th>Category</th>
                     <th>Price</th>
                     <th>Stock</th>
@@ -252,6 +358,7 @@ export default function AdminPage({ setPage }) {
                         </div>
                       </td>
                       <td style={{ fontWeight: 500 }}>{p.name}</td>
+                      <td style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>{p.brand || "-"}</td>
                       <td style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
                         {CATEGORY_META[p.category]?.label || p.category}
                       </td>

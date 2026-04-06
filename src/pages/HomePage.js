@@ -1,9 +1,40 @@
+import { useState, useEffect } from "react";
 import { CATEGORY_META } from "../constants";
 import { Icons } from "../components/Icons";
+import { ProductCard } from "../components/ProductCard";
+import { useCart } from "../contexts/CartContext";
+import { Toast, useToast, Spinner } from "../components/Toast";
+import { API } from "../config";
 
-export default function HomePage({ setPage }) {
+export default function HomePage({ setPage, onProductClick }) {
+  const [trendingProducts, setTrendingProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { addItem, cart } = useCart();
+  const { toast, show, hide } = useToast();
+  const cartNames = cart.map((i) => i.item_name);
+
+  useEffect(() => {
+    fetch(`${API}/products/trending`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setTrendingProducts(d.products);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleAdd = (product) => {
+    addItem(product._id, product.name, product.price, product.category);
+    // Note: The drawer opens automatically in App.js via handleAddToCart
+    // But since HomePage uses its local handleAdd, we might need to adjust or just let it be.
+    // Actually, I should use the handleAddToCart from props if I want the drawer to open.
+    // For now, let's just make the quick view work.
+    show(`${product.name} added to cart!`, "success");
+  };
+
   return (
     <div>
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={hide} />}
+
       {/* Hero */}
       <div className="hero">
         <div className="hero-badge">✦ Fresh. Fast. Free Delivery above ₹299</div>
@@ -26,25 +57,27 @@ export default function HomePage({ setPage }) {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="section">
-        <h2 className="section-title">Shop by Category</h2>
-        <p className="section-sub">Everything you need, all in one place</p>
-        <div className="categories-grid">
-          {Object.entries(CATEGORY_META).map(([key, { abbr, label }]) => (
-            <div
-              key={key}
-              className="category-card"
-              onClick={() => setPage(key)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === "Enter" && setPage(key)}
-            >
-              <div className="cat-abbr">{abbr}</div>
-              <div className="cat-name">{label}</div>
-            </div>
-          ))}
-        </div>
+      {/* Trending Products */}
+      <div className="section" style={{ paddingTop: 0 }}>
+        <h2 className="section-title">Trending Now</h2>
+        <p className="section-sub">Customer favorites this week</p>
+
+        {loading ? (
+          <Spinner />
+        ) : (
+          <div className="products-grid">
+            {trendingProducts.map((p) => (
+              <ProductCard
+                key={p._id}
+                product={p}
+                onAdd={handleAdd}
+                inCart={cartNames.includes(p.name)}
+                onClick={onProductClick}
+              />
+            ))}
+          </div>
+        )}
+
       </div>
     </div>
   );

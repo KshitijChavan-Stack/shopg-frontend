@@ -4,7 +4,7 @@ import { useCart } from "../contexts/CartContext";
 import { Icons } from "./Icons";
 import { CATEGORY_META } from "../constants";
 
-export default function Navbar({ page, setPage, onSearch }) {
+export default function Navbar({ page, setPage, onSearch, onCartClick }) {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -87,7 +87,7 @@ export default function Navbar({ page, setPage, onSearch }) {
             </button>
           )}
 
-          <button className="nav-btn nav-btn-dark" onClick={() => go("cart")}>
+          <button className="nav-btn nav-btn-dark" onClick={onCartClick}>
             {Icons.cart}
             <span>Cart</span>
             {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
