@@ -8,7 +8,9 @@ export default function Navbar({ page, setPage, onSearch, onCartClick }) {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const inputRef = useRef(null);
 
   const navItems = [
     { key: "home", label: "Home" },
@@ -18,28 +20,42 @@ export default function Navbar({ page, setPage, onSearch, onCartClick }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (onSearch) onSearch(searchVal.trim());
+    setMobileSearchOpen(false);
   };
 
-  const go = (p) => { setPage(p); setDrawerOpen(false); };
+  const toggleMobileSearch = () => {
+    setMobileSearchOpen(!mobileSearchOpen);
+    if (!mobileSearchOpen) {
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  };
+
+  const go = (p) => { setPage(p); setDrawerOpen(false); setMobileSearchOpen(false); };
 
   return (
     <>
       <nav className="nav">
-        {/* Logo */}
-        <div className="nav-logo" onClick={() => go("home")}>
+        {/* Logo — hidden on mobile when searching */}
+        <div className={`nav-logo ${mobileSearchOpen ? "mobile-hidden" : ""}`} onClick={() => go("home")}>
           Shop<span>G</span>
         </div>
 
         {/* Search */}
-        <form className="nav-search" onSubmit={handleSearch}>
+        <form className={`nav-search ${mobileSearchOpen ? "mobile-open" : ""}`} onSubmit={handleSearch}>
           <span className="nav-search-icon">{Icons.search}</span>
           <input
+            ref={inputRef}
             type="text"
             placeholder="Search products…"
             value={searchVal}
             onChange={(e) => setSearchVal(e.target.value)}
             aria-label="Search products"
           />
+          {mobileSearchOpen && (
+            <button type="button" className="nav-search-close" onClick={() => setMobileSearchOpen(false)}>
+              {Icons.close}
+            </button>
+          )}
         </form>
 
         {/* Desktop nav links */}
@@ -56,7 +72,11 @@ export default function Navbar({ page, setPage, onSearch, onCartClick }) {
         </div>
 
         {/* Actions */}
-        <div className="nav-actions">
+        <div className={`nav-actions ${mobileSearchOpen ? "mobile-hidden" : ""}`}>
+          <button className="nav-mobile-search-toggle" onClick={toggleMobileSearch} aria-label="Search">
+            {Icons.search}
+          </button>
+          
           {user ? (
             <>
               {user.role === "admin" && (
@@ -70,7 +90,7 @@ export default function Navbar({ page, setPage, onSearch, onCartClick }) {
               </button>
               <div className="nav-user-chip">
                 {Icons.user}
-                <span style={{ fontSize: "0.82rem" }}>{user.username}</span>
+                <span className="user-name-text">{user.username}</span>
                 <button
                   style={{ border: "none", background: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex" }}
                   onClick={logout}
