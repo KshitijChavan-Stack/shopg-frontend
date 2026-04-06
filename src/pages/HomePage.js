@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { CATEGORY_META } from "../constants";
 import { Icons } from "../components/Icons";
 import { ProductCard } from "../components/ProductCard";
 import { useCart } from "../contexts/CartContext";
