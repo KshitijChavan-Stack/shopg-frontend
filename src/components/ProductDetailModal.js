@@ -1,9 +1,11 @@
 import { Icons } from "./Icons";
 import { CATEGORY_META } from "../constants";
+import { useAuth } from "../contexts/AuthContext";
 
 export function ProductDetailModal({ product, onClose, onAdd, inCart }) {
   if (!product) return null;
   const meta = CATEGORY_META[product.category] || {};
+  const { user } = useAuth();
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -36,14 +38,16 @@ export function ProductDetailModal({ product, onClose, onAdd, inCart }) {
             {product.description || "High-quality essential product curated by ShopG for your daily needs."}
           </p>
 
-          <button
-            className={`btn-primary ${inCart ? "in-cart" : ""}`}
-            style={{ width: "100%", marginTop: "auto", padding: "16px" }}
-            onClick={() => !inCart && onAdd(product)}
-            disabled={inCart}
-          >
-            {inCart ? "Already in Cart" : `Add to Cart • ₹${product.price}`}
-          </button>
+          {user?.role !== "admin" && (
+            <button
+              className={`btn-primary ${inCart ? "in-cart" : ""}`}
+              style={{ width: "100%", marginTop: "auto", padding: "16px" }}
+              onClick={() => !inCart && onAdd(product)}
+              disabled={inCart}
+            >
+              {inCart ? "Already in Cart" : `Add to Cart • ₹${product.price}`}
+            </button>
+          )}
           
           <div style={{ display: "flex", gap: "12px", marginTop: "1rem" }}>
             <div className="hero-badge" style={{ margin: 0 }}>✦ Free Delivery</div>

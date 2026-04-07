@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { CATEGORY_META } from "./constants";
 import Navbar from "./components/Navbar";
@@ -20,6 +20,7 @@ function AppInner() {
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { addItem, cart } = useCart();
+  const { user } = useAuth();
 
   const handleSearch = (q) => {
     setSearchQuery(q);
@@ -73,11 +74,13 @@ function AppInner() {
 
       <Footer setPage={handleSetPage} />
 
-      <CartDrawer 
-        isOpen={cartDrawerOpen} 
-        onClose={() => setCartDrawerOpen(false)} 
-        onCheckout={() => { setCartDrawerOpen(false); setPage("cart"); }}
-      />
+      {user?.role !== "admin" && (
+        <CartDrawer 
+          isOpen={cartDrawerOpen} 
+          onClose={() => setCartDrawerOpen(false)} 
+          onCheckout={() => { setCartDrawerOpen(false); setPage("cart"); }}
+        />
+      )}
 
       {selectedProduct && (
         <ProductDetailModal 

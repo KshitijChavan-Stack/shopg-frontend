@@ -107,11 +107,13 @@ export default function Navbar({ page, setPage, onSearch, onCartClick }) {
             </button>
           )}
 
-          <button className="nav-btn nav-btn-dark" onClick={onCartClick}>
-            {Icons.cart}
-            <span>Cart</span>
-            {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
-          </button>
+          {user?.role !== 'admin' && (
+            <button className="nav-btn nav-btn-dark" onClick={onCartClick}>
+              {Icons.cart}
+              <span>Cart</span>
+              {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
+            </button>
+          )}
 
           {/* Hamburger — mobile only */}
           <button
