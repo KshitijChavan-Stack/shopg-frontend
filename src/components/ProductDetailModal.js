@@ -3,9 +3,9 @@ import { CATEGORY_META } from "../constants";
 import { useAuth } from "../contexts/AuthContext";
 
 export function ProductDetailModal({ product, onClose, onAdd, inCart }) {
+  const { user } = useAuth();
   if (!product) return null;
   const meta = CATEGORY_META[product.category] || {};
-  const { user } = useAuth();
 
   return (
     <div className="modal-overlay" onClick={onClose}>
