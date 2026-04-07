@@ -34,18 +34,32 @@ export function ProductDetailModal({ product, onClose, onAdd, inCart }) {
           <h2 className="section-title" style={{ fontSize: "2rem", marginBottom: 8 }}>{product.name}</h2>
           <div className="product-price" style={{ fontSize: "1.5rem" }}>₹{product.price}</div>
           
+          {/* Stock info */}
+          {(() => {
+            const isOOS = product.stock === 0;
+            const isLow = product.stock > 0 && product.stock < 10;
+            const color = isOOS ? "#dc2626" : isLow ? "#d97706" : "#16a34a";
+            const label = isOOS ? "Out of Stock" : isLow ? `Only ${product.stock} units left` : `${product.stock} units in stock`;
+            return (
+              <div className="stock-badge" style={{ color, borderColor: color + "33", background: color + "12", fontSize: "0.8rem", padding: "5px 12px" }}>
+                <span className="stock-dot" style={{ background: color }} />
+                {label}
+              </div>
+            );
+          })()}
+
           <p className="section-sub" style={{ margin: "1rem 0" }}>
             {product.description || "High-quality essential product curated by ShopG for your daily needs."}
           </p>
 
           {user?.role !== "admin" && (
             <button
-              className={`btn-primary ${inCart ? "in-cart" : ""}`}
-              style={{ width: "100%", marginTop: "auto", padding: "16px" }}
-              onClick={() => !inCart && onAdd(product)}
-              disabled={inCart}
+              className={`btn-primary ${inCart ? "in-cart" : ""} ${product.stock === 0 ? "oos-btn" : ""}`}
+              style={{ width: "100%", marginTop: "auto", padding: "16px", opacity: product.stock === 0 ? 0.5 : 1, cursor: product.stock === 0 ? "not-allowed" : "pointer" }}
+              onClick={() => !inCart && product.stock > 0 && onAdd(product)}
+              disabled={inCart || product.stock === 0}
             >
-              {inCart ? "Already in Cart" : `Add to Cart • ₹${product.price}`}
+              {product.stock === 0 ? "Out of Stock" : inCart ? "Already in Cart ✓" : `Add to Cart • ₹${product.price}`}
             </button>
           )}
           

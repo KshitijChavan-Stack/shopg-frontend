@@ -9,7 +9,6 @@ import { API } from "../config";
 export default function CartPage({ setPage }) {
   const { cart, total, removeItem, updateQty, clearCart } = useCart();
   const { user, token } = useAuth();
-  const [payment, setPayment] = useState("upi");
   const [ordered, setOrdered] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState("");
@@ -24,8 +23,7 @@ export default function CartPage({ setPage }) {
           <div className="state-icon success">{Icons.check}</div>
           <div className="state-title">Order Placed!</div>
           <p className="state-sub">
-            Your order has been placed via{" "}
-            {payment === "upi" ? "UPI" : "Cash on Delivery"}.
+            Your order has been placed. Pay via <strong>Cash on Delivery</strong> when your order arrives.
           </p>
           <button className="btn-primary" onClick={() => { setOrdered(false); setPage("home"); }}>
             Continue Shopping
@@ -171,20 +169,11 @@ export default function CartPage({ setPage }) {
           <div className="payment-section">
             <div className="payment-label">Payment Method</div>
             <div className="payment-opts">
-              {[
-                { val: "upi", label: "UPI / Online", icon: Icons.upi },
-                { val: "cod", label: "Cash on Delivery", icon: Icons.cod },
-              ].map(({ val, label, icon }) => (
-                <div
-                  key={val}
-                  className={`payment-opt ${payment === val ? "selected" : ""}`}
-                  onClick={() => setPayment(val)}
-                >
-                  <input type="radio" readOnly checked={payment === val} />
-                  {icon}
-                  {label}
-                </div>
-              ))}
+              <div className="payment-opt selected" style={{ cursor: "default" }}>
+                <input type="radio" readOnly checked />
+                {Icons.cod}
+                Cash on Delivery
+              </div>
             </div>
 
             <button className="checkout-btn" onClick={handleCheckout} disabled={submitting}>

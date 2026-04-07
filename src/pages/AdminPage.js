@@ -155,6 +155,8 @@ export default function AdminPage({ setPage }) {
   const [loading, setLoading] = useState(true);
   const [productModal, setProductModal] = useState(null); // null | "new" | product obj
   const [orderModal, setOrderModal] = useState(null);
+  const [stockEditing, setStockEditing] = useState({}); // { [productId]: tempValue }
+  const [stockSaving, setStockSaving] = useState({}); // { [productId]: true }
   const { toast, show, hide } = useToast();
 
   const authH = useMemo(() => ({
@@ -199,6 +201,35 @@ export default function AdminPage({ setPage }) {
     const data = await res.json();
     if (data.success) { show("Product deleted", "success"); fetchProducts(); }
     else show(data.message || "Error", "error");
+  };
+
+  // ── Inline stock update ──────────────────────────────────────────────────
+  const startStockEdit = (product) => {
+    setStockEditing(prev => ({ ...prev, [product._id]: product.stock }));
+  };
+
+  const cancelStockEdit = (id) => {
+    setStockEditing(prev => { const n = { ...prev }; delete n[id]; return n; });
+  };
+
+  const saveStock = async (product) => {
+    const newStock = Number(stockEditing[product._id]);
+    if (isNaN(newStock) || newStock < 0) { show("Invalid stock value", "error"); return; }
+    setStockSaving(prev => ({ ...prev, [product._id]: true }));
+    try {
+      const res = await fetch(`${API}/products/${product._id}`, {
+        method: "PUT",
+        headers: authH,
+        body: JSON.stringify({ ...product, stock: newStock }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        show(`Stock updated to ${newStock}`, "success");
+        cancelStockEdit(product._id);
+        fetchProducts();
+      } else show(data.message || "Error", "error");
+    } catch { show("Network error", "error"); }
+    finally { setStockSaving(prev => { const n = { ...prev }; delete n[product._id]; return n; }); }
   };
 
   const updateOrderStatus = async (orderId, status) => {
@@ -370,13 +401,59 @@ export default function AdminPage({ setPage }) {
                       </td>
                       <td data-label="Price" style={{ fontWeight: 600 }}>₹{p.price}</td>
                       <td data-label="Stock">
-                        <span style={{
-                          padding: "2px 8px", borderRadius: 40, fontSize: "0.72rem", fontWeight: 600,
-                          background: p.stock > 0 ? (p.stock < 10 ? "#fef3c7" : "#dcfce7") : "#fee2e2",
-                          color: p.stock > 0 ? (p.stock < 10 ? "#d97706" : "#16a34a") : "#dc2626",
-                        }}>
-                          {p.stock > 0 ? `${p.stock} Units` : "Out of Stock"}
-                        </span>
+                        {stockEditing[p._id] !== undefined ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <button
+                              className="qty-btn"
+                              style={{ width: 26, height: 26, fontSize: "1rem" }}
+                              onClick={() => setStockEditing(prev => ({ ...prev, [p._id]: Math.max(0, Number(prev[p._id]) - 1) }))}
+                              disabled={stockSaving[p._id]}
+                            >−</button>
+                            <input
+                              type="number"
+                              value={stockEditing[p._id]}
+                              min={0}
+                              onChange={e => setStockEditing(prev => ({ ...prev, [p._id]: e.target.value }))}
+                              style={{ width: 52, textAlign: "center", padding: "3px 6px", fontSize: "0.82rem", border: "1.5px solid var(--black)", borderRadius: 6, fontFamily: "Inter, sans-serif" }}
+                              disabled={stockSaving[p._id]}
+                            />
+                            <button
+                              className="qty-btn"
+                              style={{ width: 26, height: 26, fontSize: "1rem" }}
+                              onClick={() => setStockEditing(prev => ({ ...prev, [p._id]: Number(prev[p._id]) + 1 }))}
+                              disabled={stockSaving[p._id]}
+                            >+</button>
+                            <button
+                              className="icon-btn"
+                              style={{ background: "var(--black)", color: "white", border: "none", width: 28, height: 28, fontSize: "0.7rem", fontWeight: 700 }}
+                              onClick={() => saveStock(p)}
+                              disabled={stockSaving[p._id]}
+                              title="Save"
+                            >{stockSaving[p._id] ? "…" : "✓"}</button>
+                            <button
+                              className="icon-btn"
+                              style={{ fontSize: "0.7rem", color: "var(--text-muted)", width: 28, height: 28 }}
+                              onClick={() => cancelStockEdit(p._id)}
+                              title="Cancel"
+                            >✕</button>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{
+                              padding: "2px 8px", borderRadius: 40, fontSize: "0.72rem", fontWeight: 600,
+                              background: p.stock > 0 ? (p.stock < 10 ? "#fef3c7" : "#dcfce7") : "#fee2e2",
+                              color: p.stock > 0 ? (p.stock < 10 ? "#d97706" : "#16a34a") : "#dc2626",
+                            }}>
+                              {p.stock > 0 ? `${p.stock} Units` : "Out of Stock"}
+                            </span>
+                            <button
+                              className="icon-btn"
+                              style={{ width: 24, height: 24, fontSize: "0.65rem", flexShrink: 0 }}
+                              onClick={() => startStockEdit(p)}
+                              title="Edit stock"
+                            >✎</button>
+                          </div>
+                        )}
                       </td>
                       <td data-label="Actions">
                         <div className="icon-btn-row">
