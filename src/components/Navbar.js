@@ -118,10 +118,10 @@ export default function Navbar({ page, setPage, onSearch, onCartClick }) {
           {/* Hamburger — mobile only */}
           <button
             className="nav-hamburger"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open menu"
+            onClick={() => setDrawerOpen(!drawerOpen)}
+            aria-label={drawerOpen ? "Close menu" : "Open menu"}
           >
-            {Icons.menu}
+            {drawerOpen ? Icons.close : Icons.menu}
           </button>
         </div>
       </nav>
@@ -129,7 +129,7 @@ export default function Navbar({ page, setPage, onSearch, onCartClick }) {
       {/* Mobile drawer */}
       {drawerOpen && (
         <>
-          <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />
+          <div className="menu-overlay" onClick={() => setDrawerOpen(false)} />
           <div className="drawer">
             <div className="drawer-header">
               <div className="nav-logo">Shop<span>G</span></div>

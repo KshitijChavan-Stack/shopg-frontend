@@ -35,8 +35,8 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 
 /* ─── NAV ───────────────────────────────────── */
 .nav {
-  position: sticky; top: 0; z-index: 1000;
-  background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 5000;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
   height: var(--nav-h);
   display: flex; align-items: center; justify-content: space-between;
@@ -136,14 +136,14 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 }
 
 /* ─── MOBILE DRAWER ─────────────────────────── */
-.drawer-overlay {
+.menu-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-  z-index: 1100; backdrop-filter: blur(2px);
+  z-index: 4000; backdrop-filter: blur(2px);
   animation: fadeIn 0.2s ease;
 }
 .drawer {
   position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
-  background: var(--white); z-index: 1101; padding: 1.5rem;
+  background: var(--white); z-index: 4001; padding: 1.5rem;
   display: flex; flex-direction: column; gap: 6px;
   box-shadow: var(--shadow-lg);
   animation: slideRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -430,20 +430,20 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
   .admin-table, .admin-table tbody, .admin-table tr, .admin-table td { display: block; width: 100%; }
   .admin-table tr { 
     background: var(--white); border: 1px solid var(--border); 
-    border-radius: var(--radius-md); margin-bottom: 1rem; padding: 10px;
-    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg); margin-bottom: 1.25rem; padding: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
   .admin-table td { 
-    border: none; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;
-    text-align: right; border-bottom: 1px solid var(--gray-50);
+    border: none; padding: 10px 0; display: flex; align-items: center; justify-content: space-between;
+    text-align: right; border-bottom: 1px solid var(--gray-100);
   }
-  .admin-table td:last-child { border-bottom: none; }
+  .admin-table td:last-child { border-bottom: none; padding-top: 15px; }
   .admin-table td::before { 
     content: attr(data-label); font-weight: 700; font-size: 0.75rem; 
-    text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
-    text-align: left;
+    text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
+    text-align: left; margin-right: 15px;
   }
-  .admin-img-thumb { width: 50px; height: 50px; }
+  .admin-img-thumb { width: 60px; height: 60px; border-radius: var(--radius); }
 }
 
 .admin-img-thumb { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: var(--gray-100); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
@@ -517,13 +517,13 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
   .modal-content { flex-direction: row; }
 }
 
-.drawer-overlay {
+.cart-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.3);
-  z-index: 1300; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease;
+  z-index: 6000; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease;
 }
 .cart-drawer {
   position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 420px;
-  background: var(--white); z-index: 1301; display: flex; flex-direction: column;
+  background: var(--white); z-index: 6001; display: flex; flex-direction: column;
   box-shadow: -8px 0 32px rgba(0,0,0,0.1);
   animation: slideLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }

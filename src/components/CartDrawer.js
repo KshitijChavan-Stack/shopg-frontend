@@ -9,7 +9,7 @@ export function CartDrawer({ isOpen, onClose, onCheckout }) {
 
   return (
     <>
-      <div className="drawer-overlay" onClick={onClose} />
+      <div className="cart-overlay" onClick={onClose} />
       <div className="cart-drawer">
         <div className="drawer-header">
           <div className="drawer-title">Shopping Cart ({cart.length})</div>
