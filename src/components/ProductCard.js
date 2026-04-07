@@ -24,16 +24,26 @@ export function ProductCard({ product, onAdd, inCart, onClick }) {
         <div className="product-cat">{meta.label || product.category}</div>
         <div className="product-name">{product.name}</div>
         <div className="product-price">₹{product.price}</div>
+        
+        <div style={{ 
+          fontSize: '0.7rem', 
+          fontWeight: 700, 
+          marginBottom: 8,
+          color: product.stock > 0 ? (product.stock < 10 ? '#d97706' : '#16a34a') : '#dc2626'
+        }}>
+          {product.stock > 0 ? (product.stock < 10 ? `Only ${product.stock} Left` : 'In Stock') : 'Out of Stock'}
+        </div>
+
         {user?.role !== "admin" && (
           <button
-            className={`add-btn ${inCart ? "in-cart" : ""}`}
+            className={`add-btn ${inCart ? "in-cart" : ""} ${product.stock === 0 ? "out-of-stock" : ""}`}
             onClick={(e) => {
               e.stopPropagation();
-              !inCart && onAdd(product);
+              !inCart && product.stock > 0 && onAdd(product);
             }}
-            disabled={inCart}
+            disabled={inCart || product.stock === 0}
           >
-            {inCart ? "In Cart" : "Add to Cart"}
+            {product.stock === 0 ? "Out of Stock" : (inCart ? "In Cart" : "Add to Cart")}
           </button>
         )}
       </div>

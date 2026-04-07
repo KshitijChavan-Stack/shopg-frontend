@@ -10,7 +10,7 @@ const STATUS_OPTIONS = ["pending", "processing", "shipped", "delivered", "cancel
 
 function ProductModal({ product, onClose, onSave, show }) {
   const [form, setForm] = useState(
-    product || { name: "", price: "", category: "grocery", brand: "", image: "", description: "" }
+    product || { name: "", price: "", category: "grocery", brand: "", image: "", description: "", stock: 0 }
   );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -66,6 +66,10 @@ function ProductModal({ product, onClose, onSave, show }) {
         <div className="form-group">
           <label className="form-label">Price (₹)</label>
           <input className="form-input" type="number" value={form.price} onChange={(e) => set("price", e.target.value)} placeholder="0" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Stock Quantity</label>
+          <input className="form-input" type="number" value={form.stock} onChange={(e) => set("stock", e.target.value)} placeholder="0" />
         </div>
         <div className="form-group">
           <label className="form-label">Category</label>
@@ -219,6 +223,7 @@ export default function AdminPage({ setPage }) {
         const products = results.data.map(p => ({
           ...p,
           price: Number(p.price),
+          stock: Number(p.stock || 0),
           image: p.image || p.image_url || ""
         }));
 
@@ -249,6 +254,7 @@ export default function AdminPage({ setPage }) {
       category: "grocery",
       brand: "Brand Name",
       description: "Description here",
+      stock: 50,
       image: "https://example.com/img.jpg"
     }]);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -366,10 +372,10 @@ export default function AdminPage({ setPage }) {
                       <td data-label="Stock">
                         <span style={{
                           padding: "2px 8px", borderRadius: 40, fontSize: "0.72rem", fontWeight: 600,
-                          background: p.inStock ? "#dcfce7" : "#fee2e2",
-                          color: p.inStock ? "#16a34a" : "#dc2626",
+                          background: p.stock > 0 ? (p.stock < 10 ? "#fef3c7" : "#dcfce7") : "#fee2e2",
+                          color: p.stock > 0 ? (p.stock < 10 ? "#d97706" : "#16a34a") : "#dc2626",
                         }}>
-                          {p.inStock ? "In Stock" : "Out"}
+                          {p.stock > 0 ? `${p.stock} Units` : "Out of Stock"}
                         </span>
                       </td>
                       <td data-label="Actions">
