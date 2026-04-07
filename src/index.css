@@ -35,7 +35,7 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 
 /* ─── NAV ───────────────────────────────────── */
 .nav {
-  position: sticky; top: 0; z-index: 200;
+  position: sticky; top: 0; z-index: 1000;
   background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   height: var(--nav-h);
@@ -138,12 +138,12 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 /* ─── MOBILE DRAWER ─────────────────────────── */
 .drawer-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-  z-index: 300; backdrop-filter: blur(2px);
+  z-index: 999; backdrop-filter: blur(2px);
   animation: fadeIn 0.2s ease;
 }
 .drawer {
   position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
-  background: var(--white); z-index: 301; padding: 1.5rem;
+  background: var(--white); z-index: 1001; padding: 1.5rem;
   display: flex; flex-direction: column; gap: 6px;
   box-shadow: var(--shadow-lg);
   animation: slideRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -411,11 +411,41 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
   transition: all var(--transition); color: var(--text-muted);
 }
 .admin-tab.active { background: var(--white); color: var(--black); box-shadow: var(--shadow-sm); }
-.admin-table-wrap { overflow-x: auto; }
-.admin-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-.admin-table th { background: var(--gray-50); border-bottom: 2px solid var(--border); padding: 10px 14px; text-align: left; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); white-space: nowrap; }
-.admin-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.admin-table tr:hover td { background: var(--gray-50); }
+.admin-actions-row { 
+  display: flex; justify-content: space-between; align-items: center; 
+  margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px; 
+}
+.admin-actions-group { display: flex; gap: 12px; }
+
+@media (max-width: 600px) {
+  .admin-actions-row { flex-direction: column; align-items: stretch; }
+  .admin-actions-group { justify-content: space-between; }
+  .admin-actions-group > * { flex: 1; justify-content: center; }
+  .btn-label-desktop { display: none; }
+}
+
+/* Responsive Tables for Admin */
+@media (max-width: 900px) {
+  .admin-table thead { display: none; }
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table td { display: block; width: 100%; }
+  .admin-table tr { 
+    background: var(--white); border: 1px solid var(--border); 
+    border-radius: var(--radius-md); margin-bottom: 1rem; padding: 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .admin-table td { 
+    border: none; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;
+    text-align: right; border-bottom: 1px solid var(--gray-50);
+  }
+  .admin-table td:last-child { border-bottom: none; }
+  .admin-table td::before { 
+    content: attr(data-label); font-weight: 700; font-size: 0.75rem; 
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+    text-align: left;
+  }
+  .admin-img-thumb { width: 50px; height: 50px; }
+}
+
 .admin-img-thumb { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: var(--gray-100); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
 .admin-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .icon-btn {
@@ -426,6 +456,11 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 .icon-btn:hover { border-color: var(--black); background: var(--gray-50); }
 .icon-btn.danger:hover { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
 .icon-btn-row { display: flex; gap: 6px; }
+
+@media (max-width: 480px) {
+  .admin-tabs { flex-direction: column; }
+  .admin-tab { width: 100%; }
+}
 
 /* ─── MODALS & DRAWERS ───────────────────────── */
 .modal-overlay {
@@ -444,6 +479,13 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
   box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative; overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .modal { padding: 1.5rem; border-radius: 24px; }
+  .modal-title { font-size: 1.25rem; margin-bottom: 1.5rem; }
+  .modal-footer { margin-top: 1.5rem; flex-direction: column-reverse; }
+  .btn-save, .btn-cancel { height: 44px; font-size: 0.9rem; }
 }
 
 .modal-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 2rem; color: var(--black); }

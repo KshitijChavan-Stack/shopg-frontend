@@ -313,18 +313,18 @@ export default function AdminPage({ setPage }) {
       {/* Products Tab */}
       {tab === "products" && (
         <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: 12 }}>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button className="btn-outline" style={{ fontSize: "0.8rem", height: 38 }} onClick={downloadTemplate}>
-                {Icons.download} Template
+          <div className="admin-actions-row">
+            <div className="admin-actions-group">
+              <button className="btn-outline" onClick={downloadTemplate}>
+                {Icons.download} <span className="btn-label-desktop">Template</span>
               </button>
-              <label className="btn-outline" style={{ fontSize: "0.8rem", height: 38, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-                {Icons.plus} Bulk Upload
+              <label className="btn-outline" style={{ cursor: "pointer" }}>
+                {Icons.plus} <span className="btn-label-desktop">Bulk</span> Upload
                 <input type="file" hidden accept=".csv" onChange={handleBulkUpload} />
               </label>
             </div>
             
-            <button className="btn-primary" style={{ gap: 8, height: 38 }} onClick={() => setProductModal("new")}>
+            <button className="btn-primary" onClick={() => setProductModal("new")}>
               {Icons.plus} Add Product
             </button>
           </div>
@@ -346,7 +346,7 @@ export default function AdminPage({ setPage }) {
                 <tbody>
                   {products.map((p) => (
                     <tr key={p._id}>
-                      <td>
+                      <td data-label="Image">
                         <div className="admin-img-thumb">
                           {p.image ? (
                             <img src={p.image} alt={p.name} onError={(e) => e.target.style.display = "none"} />
@@ -357,13 +357,13 @@ export default function AdminPage({ setPage }) {
                           )}
                         </div>
                       </td>
-                      <td style={{ fontWeight: 500 }}>{p.name}</td>
-                      <td style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>{p.brand || "-"}</td>
-                      <td style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
+                      <td data-label="Name" style={{ fontWeight: 500 }}>{p.name}</td>
+                      <td data-label="Brand" style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>{p.brand || "-"}</td>
+                      <td data-label="Category" style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
                         {CATEGORY_META[p.category]?.label || p.category}
                       </td>
-                      <td style={{ fontWeight: 600 }}>₹{p.price}</td>
-                      <td>
+                      <td data-label="Price" style={{ fontWeight: 600 }}>₹{p.price}</td>
+                      <td data-label="Stock">
                         <span style={{
                           padding: "2px 8px", borderRadius: 40, fontSize: "0.72rem", fontWeight: 600,
                           background: p.inStock ? "#dcfce7" : "#fee2e2",
@@ -372,7 +372,7 @@ export default function AdminPage({ setPage }) {
                           {p.inStock ? "In Stock" : "Out"}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Actions">
                         <div className="icon-btn-row">
                           <button className="icon-btn" onClick={() => setProductModal(p)} title="Edit">
                             {Icons.edit}
@@ -409,22 +409,22 @@ export default function AdminPage({ setPage }) {
             <tbody>
               {orders.map((o) => (
                 <tr key={o._id}>
-                  <td style={{ fontFamily: "monospace", fontSize: "0.8rem" }}>
+                  <td data-label="Order ID" style={{ fontFamily: "monospace", fontSize: "0.8rem" }}>
                     #{o._id.slice(-8).toUpperCase()}
                   </td>
-                  <td>
+                  <td data-label="Customer">
                     <div style={{ fontWeight: 500, fontSize: "0.875rem" }}>{o.customerName}</div>
                     <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{o.contact}</div>
                   </td>
-                  <td style={{ fontSize: "0.82rem", color: "var(--text-muted)", maxWidth: 180 }}>
+                  <td data-label="Items" style={{ fontSize: "0.82rem", color: "var(--text-muted)", maxWidth: 180 }}>
                     {o.items.map((i) => `${i.name} ×${i.quantity}`).join(", ")}
                   </td>
-                  <td style={{ fontWeight: 700 }}>₹{o.totalAmount}</td>
-                  <td><span className={`order-status status-${o.status}`}>{o.status}</span></td>
-                  <td style={{ fontSize: "0.78rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                  <td data-label="Total" style={{ fontWeight: 700 }}>₹{o.totalAmount}</td>
+                  <td data-label="Status"><span className={`order-status status-${o.status}`}>{o.status}</span></td>
+                  <td data-label="Date" style={{ fontSize: "0.78rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
                     {new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
-                  <td>
+                  <td data-label="Actions">
                     <button className="icon-btn" onClick={() => setOrderModal(o)} title="Update Status">
                       {Icons.edit}
                     </button>
